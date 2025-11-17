@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEC Cargo | Gallery</title>
+
+<style>
+  /* --- Global Styles --- */
+  .body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #000000, #1a1a1a 40%, #cbab2a 75%, #6a1b1b 95%);
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 2.5rem;
+    margin: 30px 0;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 4px #000;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    margin: 40px 0 15px 40px;
+    text-transform: uppercase;
+    border-left: 5px solid #ffcc00;
+    padding-left: 10px;
+  }
+
+  /* --- Section Container --- */
+  .gallery-section {
+    padding: 0 40px 60px;
+    position: relative;
+  }
+
+  /* --- Zoom Preview Box --- */
+  .zoom-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 25px;
+    height: 380px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .zoom-box img {
+    height: 100%;
+    width: auto;
+    max-width: 90%;
+    object-fit: contain;
+    transition: transform 0.4s ease;
+  }
+
+  /* --- Thumbnail Row --- */
+  .thumbnail-row {
+    /* padding-top: 30px; */
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .thumbnail-row img {
+    width: 140px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 10px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+
+  .thumbnail-row img:hover,
+  .thumbnail-row img.active {
+    transform: scale(1.05);
+    opacity: 1;
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.8);
+  }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    background: rgba(0,0,0,0.5);
+    color: #ccc;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 768px) {
+    .zoom-box { height: 250px; }
+    .thumbnail-row img { width: 100px; height: 80px; }
+    h2 { margin-left: 20px; }
+  }
+</style>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body class="body">
+ <div id="header"></div>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+<h1>MEC Cargo Gallery</h1>
+
+<!-- ✅ Section 1: Achievements -->
+<div class="gallery-section" id="achievements">
+  <h2>Achievements</h2>
+  <div class="zoom-box">
+    <img src="assets/Achivements/certificate1.png" alt="ISO Certificate" id="main-achievement">
+  </div>
+  <div class="thumbnail-row">
+    <img src="assets/Achivements/certificate1.png" alt="ISO Certificate" class="active">
+    <img src="assets/Achivements/certificate2.png" alt="Top Performer Award">
+    <img src="assets/Achivements/certificate3.png" alt="Quality Management">
+    <img src="assets/Achivements/certificate4.png" alt="Customer Excellence">
+  </div>
+</div>
+
+<!-- ✅ Section 2: Festivals -->
+<div class="gallery-section" id="festivals">
+  <h2>Festivals</h2>
+  <div class="zoom-box">
+    <img src="assets/Festivals/festival1.jpg" alt="Diwali Celebration" id="main-festival">
+  </div>
+  <div class="thumbnail-row">
+    <img src="assets/Festivals/festival1.jpg" alt="Diwali Celebration" class="active">
+    <img src="assets/Festivals/festival2.jpg" alt="Holi Celebration">
+    <img src="assets/Festivals/festival3.jpg" alt="Annual Day">
+    <img src="assets/Festivals/festival4.jpg" alt="Christmas Party">
+  </div>
+</div>
+
+<!-- ✅ Section 3: Containers -->
+<div class="gallery-section" id="containers">
+  <h2>Containers</h2>
+  <div class="zoom-box">
+    <img src="assets/Containers/container1.jpg" alt="Container Loading" id="main-container">
+  </div>
+  <div class="thumbnail-row">
+    <img src="assets/Containers/container1.jpg" alt="Container Loading" class="active">
+    <img src="assets/Containers/container2.jpg" alt="Port Handling">
+    <img src="assets/Containers/container3.jpg" alt="Sea Cargo">
+    <img src="assets/Containers/container4.jpg" alt="Truck Containers">
+  </div>
+</div>
+
+<div id="footer"></div>
+ <script>
+  // Load Header
+  fetch("header.html")
+    .then(r => r.text())
+    .then(html => {
+      document.getElementById("header").innerHTML = html;
+
+      // ✅ Activate toggle once header is loaded
+      const navToggle = document.getElementById("navToggle");
+      const nav = document.getElementById("nav");
+      if (navToggle && nav) {
+        navToggle.addEventListener("click", () => {
+          nav.classList.toggle("show");
+          navToggle.classList.toggle("open");
+        });
+      }
+    });
+
+  // Load Footer
+  fetch("footer.html")
+    .then(r => r.text())
+    .then(html => (document.getElementById("footer").innerHTML = html));
+</script>
+
+<script>
+  // Helper function to handle each gallery section dynamically
+  function setupGallery(sectionId, mainImageId) {
+    const section = document.getElementById(sectionId);
+    const mainImage = document.getElementById(mainImageId);
+    const thumbs = section.querySelectorAll(".thumbnail-row img");
+
+    thumbs.forEach((thumb) => {
+      thumb.addEventListener("click", () => {
+        thumbs.forEach(t => t.classList.remove("active"));
+        thumb.classList.add("active");
+        mainImage.src = thumb.src;
+        mainImage.alt = thumb.alt;
+        mainImage.style.transform = "scale(0.95)";
+        setTimeout(() => mainImage.style.transform = "scale(1)", 200);
+      });
+    });
+  }
+
+  // Initialize galleries
+  setupGallery("achievements", "main-achievement");
+  setupGallery("festivals", "main-festival");
+  setupGallery("containers", "main-container");
+</script>
+ <script>
+    const navToggle = document.getElementById("navToggle");
+const nav = document.getElementById("nav");
+
+if (navToggle && nav) {
+  navToggle.addEventListener("click", () => {
+    nav.classList.toggle("show");
+    navToggle.classList.toggle("open");
+  });
+}
+  </script>
+
+</body>
+</html>

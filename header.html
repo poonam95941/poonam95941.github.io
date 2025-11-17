@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mass Express Cargo</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <!-- ✅ HEADER must be inside body -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">
+        <div class="logo-mark">
+          <img src="assets/logo.png" alt="MEC Logo" style="width: 46px; height: 53px;">
+        </div>
+        <div class="logo-text">Mass Express Cargo</div>
+      </a>
+
+      <nav class="nav" id="nav">
+        <a href="index.html">Home</a>
+        <a href="aboutus.html">About Us</a>
+        <a href="services.html">Services</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="contactUs.html">Contact</a>
+         <a href="contactUs.html" class="cta">Get Quote</a>
+        <button class="cta" id="cta-book">Get Quote</button>
+      </nav>
+
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ✅ Script should come *after* header -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const navToggle = document.getElementById("navToggle");
+      const nav = document.getElementById("nav");
+
+      if (navToggle && nav) {
+        navToggle.addEventListener("click", () => {
+          nav.classList.toggle("show");
+          navToggle.classList.toggle("open");
+        });
+      }
+    });
+  </script>
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.body.classList.add("fade-in");
+  });
+
+  // Optional: fade-out before leaving the page
+  const links = document.querySelectorAll("a[href]");
+  links.forEach(link => {
+    if (link.hostname === window.location.hostname) {
+      link.addEventListener("click", e => {
+        const target = link.getAttribute("target");
+        if (!target || target === "_self") {
+          e.preventDefault();
+          document.body.classList.remove("fade-in");
+          document.body.style.opacity = "0";
+          setTimeout(() => { window.location = link.href; }, 300);
+        }
+      });
+    }
+  });
+</script>
+</body>
+</html>

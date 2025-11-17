@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact | Mass Express Cargo Pvt. Ltd.</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+ <!-- <link rel="stylesheet" href="style.css"/> -->
+<style>
+  /* ====== GLOBAL ====== */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  body {
+    background: #0a0a0a;
+    color: #eee;
+    overflow-x: hidden;
+  }
+
+  .headcontact {
+    text-align: center;
+    padding: 100px 120px 30px;
+  }
+
+  header h1 {
+    font-size: 2.6rem;
+    color: #f1c40f; /* soft yellow accent */
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  header p {
+    margin-top: 10px;
+    color: #888;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+  }
+
+  /* ====== CONTACT CONTAINER ====== */
+  .contact-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 40px auto;
+    max-width: 1100px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
+  }
+
+  /* ====== LEFT SIDE INFO ====== */
+  .contact-info {
+    flex: 1 1 400px;
+    padding: 40px;
+    background: #111;
+    border-right: 1px solid rgba(241, 196, 15, 0.2);
+  }
+
+  .contact-info h2 {
+    color: #f1c40f;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+  }
+
+  .info-item {
+    margin: 15px 0;
+    line-height: 1.6;
+    color: #ddd;
+  }
+
+  .info-item i {
+    color: #f1c40f;
+    margin-right: 10px;
+  }
+
+  .map {
+    margin-top: 25px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .map iframe {
+    width: 100%;
+    height: 500px;
+    border: none;
+  }
+
+  /* ====== RIGHT SIDE FORM ====== */
+  .contact-form {
+    flex: 1 1 500px;
+    padding: 40px;
+    background: linear-gradient(145deg, #0d0d0d, #151515);
+  }
+
+  .contact-form h3 {
+    color: #f1c40f;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 15px;
+    transition: 0.3s;
+  }
+
+  input:focus, textarea:focus {
+    border-color: #f1c40f;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+  }
+
+  textarea {
+    resize: none;
+    height: 100px;
+  }
+
+  button {
+    margin-top: 10px;
+    background: #f1c40f;
+    color: #000;
+    font-weight: 600;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  button:hover {
+    background: #ff4747;
+    color: #fff;
+    transform: scale(1.03);
+  }
+
+  .netvideo
+  {
+    width: 700px;
+  }
+
+  @media(max-width: 768px) {
+    .contact-container {
+      flex-direction: column;
+    }
+    .contact-info {
+      border-right: none;
+      border-bottom: 1px solid rgba(241, 196, 15, 0.2);
+    }
+   .netvideo
+   {
+      position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1;
+   }
+  }
+</style>
+</head>
+<body>
+   
+ 
+  <div id="header"></div>
+  <div class="headcontact">
+    <h1>Contact Us</h1>
+    <!-- <p>Welcome to Mass Express Cargo Pvt. Ltd. — where excellence meets innovation.</p> -->
+  </div>
+
+  <div class="contact-container">
+    <!-- LEFT: Info -->
+       <div class="netvideo">
+    <video autoplay muted loop playsinline id="bgVideo">
+      <source src="assets/network/media_10.mp4" type="video/mp4" />
+      Your browser does not support HTML5 video.
+    </video>
+     </div>
+    <div class="contact-info">
+      <h2>Get In Touch</h2>
+      <div class="info-item"><i class="fa-solid fa-headset"></i> 24x7 Customer Care: 020-24222814</div>
+      <div class="info-item"><i class="fa-solid fa-phone"></i> Mobile: +91 9325761824</div>
+      <div class="info-item"><i class="fa-solid fa-building"></i> 
+        Prabodh Heights, Plot No. 6, Neminath Co-op. Housing Society,<br>
+        Bibwewadi, Opp. Hotel Tiranga,<br>
+        Pune Satara Road, Pune 411037.
+      </div>
+      <div class="info-item"><i class="fa-solid fa-envelope"></i> info@meccargo.com</div>
+      <div class="info-item"><i class="fa-solid fa-clock"></i> Mon - Sat: 09:30am - 06:30pm</div>
+
+      
+    </div>
+</div>
+
+<div class="contact-container">
+    <!-- RIGHT: Form -->
+    <div class="contact-form">
+      <h3>Feel Free To Write Us</h3>
+      <form id="contactForm">
+        <div class="form-group"><input type="text" placeholder="Full Name" required></div>
+        <div class="form-group"><input type="email" placeholder="Email" required></div>
+        <div class="form-group"><input type="text" placeholder="Mobile" required></div>
+        <div class="form-group"><input type="text" placeholder="Company"></div>
+        <div class="form-group"><textarea placeholder="Message" required></textarea></div>
+        <button type="submit"><i class="fa-solid fa-paper-plane"></i> Send Message</button>
+      </form>
+    </div>
+      <div class="map">
+        <iframe 
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3772.071874970911!2d73.85254837500513!3d18.51672628257633!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c06d39b87a91%3A0x1bb4e6c60b25d585!2sBibwewadi%2C%20Pune%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1701234567890"
+          allowfullscreen="" loading="lazy">
+        </iframe>
+      </div>
+    
+  </div>
+
+ <div id="footer"></div>
+<script>
+  // Load Header
+  fetch("header.html")
+    .then(r => r.text())
+    .then(html => {
+      document.getElementById("header").innerHTML = html;
+
+      // ✅ Activate toggle once header is loaded
+      const navToggle = document.getElementById("navToggle");
+      const nav = document.getElementById("nav");
+      if (navToggle && nav) {
+        navToggle.addEventListener("click", () => {
+          nav.classList.toggle("show");
+          navToggle.classList.toggle("open");
+        });
+      }
+    });
+
+  // Load Footer
+  fetch("footer.html")
+    .then(r => r.text())
+    .then(html => (document.getElementById("footer").innerHTML = html));
+</script>
+
+
+  <script>
+    document.getElementById("contactForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      alert("Thank you for contacting Mass Express Cargo! We’ll get back to you soon.");
+      this.reset();
+    });
+  </script>
+
+    
+
+</body>
+</html>

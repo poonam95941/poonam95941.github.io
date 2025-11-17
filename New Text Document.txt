@@ -1,0 +1,309 @@
+// script.js (module)
+// Uses Three.js from unpkg. No .glb models; globe + animated truck + trade routes are procedural.
+import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
+import { OrbitControls } from 'https://unpkg.com/three@0.158.0/examples/jsm/controls/OrbitControls.js';
+
+// ---------- UI ----------
+const nav = document.getElementById('nav');
+const navToggle = document.getElementById('navToggle');
+navToggle.addEventListener('click', () => nav.classList.toggle('show'));
+document.getElementById('year').textContent = new Date().getFullYear();
+
+const form = document.getElementById('quoteForm');
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  alert('Thank you! Your quote request was submitted. We will follow up via email.');
+  form.reset();
+});
+document.getElementById('resetBtn').addEventListener('click', () => form.reset());
+
+// ---------- 3D scene ----------
+const canvas = document.getElementById('three-canvas');
+const MOBILE_BREAKPOINT = 600;
+const enable3D = window.innerWidth > MOBILE_BREAKPOINT;
+
+if (!enable3D) {
+  // lightweight fallback for small screens
+  const threeWrap = document.getElementById('three-wrap');
+  threeWrap.style.background = 'linear-gradient(180deg,#0b1220,#071428)';
+  threeWrap.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-weight:600">3D preview disabled on small screens</div>';
+} else {
+  initScene();
+}
+
+function initScene() {
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+
+  const scene = new THREE.Scene();
+
+  // camera
+  const fov = 40;
+  const camera = new THREE.PerspectiveCamera(fov, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+  camera.position.set(0, 6, 18);
+
+  // controls (subtle)
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.06;
+  controls.enablePan = false;
+  controls.minDistance = 8;
+  controls.maxDistance = 40;
+  controls.maxPolarAngle = Math.PI * 0.9;
+  controls.autoRotate = false;
+
+  // lights
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.85);
+  scene.add(hemi);
+  const dir = new THREE.DirectionalLight(0xffffff, 0.7);
+  dir.position.set(10, 20, 10);
+  scene.add(dir);
+
+  // subtle ground plane (for road)
+  const groundGeo = new THREE.PlaneGeometry(80, 60, 4, 4);
+  const groundMat = new THREE.MeshStandardMaterial({ color: 0x071025, roughness: 1, metalness: 0 });
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = -0.5;
+  scene.add(ground);
+
+  // ---------- GLOBE ----------
+  const globeGroup = new THREE.Group();
+  globeGroup.position.set(-5, 1.5, 0);
+  scene.add(globeGroup);
+
+  const sphereGeo = new THREE.SphereGeometry(4, 64, 32);
+  const sphereMat = new THREE.MeshStandardMaterial({
+    color: 0x0c3b66,
+    metalness: 0.05,
+    roughness: 0.7,
+    emissive: 0x00121a,
+  });
+  const globe = new THREE.Mesh(sphereGeo, sphereMat);
+  globeGroup.add(globe);
+
+  // lat/long lines - subtle wireframe rings
+  const ringMat = new THREE.LineBasicMaterial({ color: 0x0f3f5f, linewidth: 1, transparent: true, opacity: 0.65 });
+  for (let i = -3; i <= 3; i++) {
+    const lat = new THREE.CircleGeometry(4 * Math.cos(i * 0.3), 128);
+    lat.rotateX(Math.PI / 2 - i * 0.1);
+    const latLine = new THREE.Line(lat, ringMat);
+    latLine.geometry.vertices.shift(); // remove duplicate vertex
+    globeGroup.add(latLine);
+  }
+
+  // small markers for ports
+  const markerGeo = new THREE.SphereGeometry(0.08, 8, 6);
+  const markerMat = new THREE.MeshStandardMaterial({ color: 0xffb703, emissive: 0x332000 });
+  const ports = [
+    { lon: 72.8, lat: 19.0 }, // Mumbai
+    { lon: 121.5, lat: 31.2 }, // Shanghai
+    { lon: -74.0, lat: 40.7 }, // New York
+    { lon: 2.35, lat: 48.85 }, // Paris
+    { lon: 31.2, lat: 30.0 }, // Cairo
+  ];
+  ports.forEach(p => {
+    const m = new THREE.Mesh(markerGeo, markerMat);
+    const pos = latLonToVector3(p.lat, p.lon, 4.02);
+    m.position.copy(pos);
+    globeGroup.add(m);
+  });
+
+  // ---------- TRADE ROUTES (curved tubes) ----------
+  const routeMat = new THREE.MeshBasicMaterial({ color: 0xffd59e, transparent: true, opacity: 0.9 });
+  const routePairs = [
+    [{ lat: 19.0, lon: 72.8 }, { lat: 48.85, lon: 2.35 }],   // Mumbai -> Paris
+    [{ lat: 31.2, lon: 121.5 }, { lat: 40.7, lon: -74.0 }],  // Shanghai -> New York
+    [{ lat: 19.0, lon: 72.8 }, { lat: 30.0, lon: 31.2 }],    // Mumbai -> Cairo
+  ];
+  const routeCurves = [];
+  routePairs.forEach(pair => {
+    const a = latLonToVector3(pair[0].lat, pair[0].lon, 4.02);
+    const b = latLonToVector3(pair[1].lat, pair[1].lon, 4.02);
+    const mid = a.clone().lerp(b, 0.5).multiplyScalar(1.25); // arc outwards
+    const curve = new THREE.CatmullRomCurve3([a, mid, b]);
+    routeCurves.push(curve);
+    const tube = new THREE.TubeGeometry(curve, 100, 0.03, 8, false);
+    const mesh = new THREE.Mesh(tube, routeMat);
+    globeGroup.add(mesh);
+  });
+
+  // small moving spheres along routes (represent shipments)
+  const shipmentMat = new THREE.MeshStandardMaterial({ color: 0xff6b6b, emissive: 0x220000 });
+  const shipments = routeCurves.map(curve => {
+    const s = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 6), shipmentMat);
+    s.userData = { curve, t: Math.random() * 1 };
+    globeGroup.add(s);
+    return s;
+  });
+
+  // ---------- TRUCK (box + wheels) moving on a road curve ----------
+  const truckGroup = new THREE.Group();
+  truckGroup.position.set(6, 0.4, -2);
+  scene.add(truckGroup);
+
+  // truck body
+  const body = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.1, 1.3), new THREE.MeshStandardMaterial({ color: 0xffb703, metalness: 0.2, roughness: 0.4 }));
+  body.position.y = 0.6;
+  truckGroup.add(body);
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.9, 1.1), new THREE.MeshStandardMaterial({ color: 0xff6b6b, metalness: 0.2, roughness: 0.4 }));
+  cabin.position.set(1.05, 0.55, 0);
+  truckGroup.add(cabin);
+
+  // wheels
+  const wheelGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.4, 12);
+  wheelGeo.rotateZ(Math.PI / 2);
+  const wheelMat = new THREE.MeshStandardMaterial({ color: 0x0b0b0b, metalness: 0.1, roughness: 0.8 });
+  const wheelPositions = [
+    [-1.0, 0.2, 0.6],
+    [-1.0, 0.2, -0.6],
+    [0.3, 0.2, 0.6],
+    [0.3, 0.2, -0.6],
+  ];
+  wheelPositions.forEach(pos => {
+    const w = new THREE.Mesh(wheelGeo, wheelMat);
+    w.position.set(...pos);
+    truckGroup.add(w);
+  });
+
+  // truck route path (a smooth curve across the ground)
+  const truckPathPoints = [
+    new THREE.Vector3(8, 0.4, -10),
+    new THREE.Vector3(6, 0.4, -4),
+    new THREE.Vector3(4, 0.4, -1.5),
+    new THREE.Vector3(2, 0.4, 1.5),
+    new THREE.Vector3(-1, 0.4, 4),
+    new THREE.Vector3(-4, 0.4, 6),
+    new THREE.Vector3(-8, 0.4, 8),
+  ];
+  const truckCurve = new THREE.CatmullRomCurve3(truckPathPoints);
+  // draw the road (dashed line)
+  const roadGeo = new THREE.TubeGeometry(truckCurve, 200, 0.12, 6, false);
+  const roadMat = new THREE.MeshStandardMaterial({ color: 0x0c3150, roughness: 1 });
+  const roadMesh = new THREE.Mesh(roadGeo, roadMat);
+  scene.add(roadMesh);
+
+  // markers on road (dots)
+  const dashMat = new THREE.LineBasicMaterial({ color: 0xfff3d6, linewidth: 2, transparent: true, opacity: 0.8 });
+  const roadPoints = truckCurve.getPoints(100);
+  const dashGeom = new THREE.BufferGeometry().setFromPoints(roadPoints);
+  const roadLine = new THREE.Line(dashGeom, dashMat);
+  scene.add(roadLine);
+
+  // ---------- ambient particles (floating) ----------
+  const particleCount = 200;
+  const positions = new Float32Array(particleCount * 3);
+  for (let i = 0; i < particleCount; i++) {
+    positions[i * 3 + 0] = (Math.random() - 0.5) * 80;
+    positions[i * 3 + 1] = Math.random() * 6 + 0.5;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 60;
+  }
+  const particleGeo = new THREE.BufferGeometry();
+  particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const particleMat = new THREE.PointsMaterial({ size: 0.06, transparent: true, opacity: 0.85 });
+  const particles = new THREE.Points(particleGeo, particleMat);
+  scene.add(particles);
+
+  // handle picking / click on truck
+  const raycaster = new THREE.Raycaster();
+  const pointer = new THREE.Vector2();
+  let truckInfoShown = false;
+
+  canvas.addEventListener('pointerdown', (ev) => {
+    pointer.x = (ev.clientX / canvas.clientWidth) * 2 - 1;
+    pointer.y = -(ev.clientY / canvas.clientHeight) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    const intersects = raycaster.intersectObject(truckGroup, true);
+    if (intersects.length) {
+      // quick interactive feedback
+      if (!truckInfoShown) {
+        alert('Truck in transit — ETA: 3 days. Mode: Road transport.');
+        truckInfoShown = true;
+        setTimeout(() => (truckInfoShown = false), 2000);
+      }
+    }
+  });
+
+  // responsiveness
+  function resize() {
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    if (canvas.width !== w || canvas.height !== h) {
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+  }
+  window.addEventListener('resize', resize);
+
+  // animation state
+  let clock = 0;
+  let truckT = 0;
+  function animate() {
+    clock += 0.015;
+
+    // globe rotate
+    globe.rotation.y += 0.003 + 0.001 * Math.sin(clock * 0.6);
+    globe.rotation.x = Math.sin(clock * 0.08) * 0.02;
+
+    // globe group slight bob
+    globeGroup.position.y = 1.5 + Math.sin(clock * 0.6) * 0.06;
+
+    // shipments along curves
+    shipments.forEach(s => {
+      s.userData.t += 0.002 + Math.random() * 0.002;
+      if (s.userData.t > 1) s.userData.t = 0;
+      const pos = s.userData.curve.getPointAt(s.userData.t);
+      s.position.copy(pos);
+      // make them face forward
+      const next = s.userData.curve.getPointAt((s.userData.t + 0.01) % 1);
+      s.lookAt(next);
+    });
+
+    // truck movement
+    truckT += 0.0009 * (1 + Math.sin(clock * 0.6) * 0.5);
+    if (truckT > 1) truckT = 0;
+    const truckPos = truckCurve.getPointAt(truckT);
+    truckGroup.position.copy(truckPos);
+    // align to tangent
+    const tangent = truckCurve.getTangentAt(truckT).normalize();
+    const angle = Math.atan2(tangent.x, tangent.z);
+    truckGroup.rotation.y = angle;
+
+    // wheel rotation visual (spin)
+    truckGroup.children.forEach(child => {
+      if (child.geometry && child.geometry.type === 'CylinderGeometry') {
+        child.rotation.x -= 0.18;
+      }
+    });
+
+    // particles drift
+    const posAttr = particleGeo.attributes.position.array;
+    for (let i = 0; i < particleCount; i++) {
+      let idx = i * 3;
+      posAttr[idx] += 0.02;
+      if (posAttr[idx] > 40) posAttr[idx] = -40;
+    }
+    particleGeo.attributes.position.needsUpdate = true;
+
+    controls.update();
+    resize();
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+}
+
+// ---------- helpers ----------
+function latLonToVector3(lat, lon, radius) {
+  // convert lat/lon in degrees to 3D position on sphere
+  const phi = (90 - lat) * (Math.PI / 180);
+  const theta = (lon + 180) * (Math.PI / 180);
+  const x = -(radius * Math.sin(phi) * Math.cos(theta));
+  const z = radius * Math.sin(phi) * Math.sin(theta);
+  const y = radius * Math.cos(phi);
+  return new THREE.Vector3(x, y, z);
+}
